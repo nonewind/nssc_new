@@ -18,7 +18,7 @@ def flie_reader(year):
     with open(year+'.csv', 'a+', encoding='utf-8', newline='') as csvflie:
         w_csv_f = csv.writer(csvflie)
         w_csv_f.writerow(row)
-    with open('app/关键词_11-6.txt', 'r', encoding='utf8') as f:
+    with open('app/关键词.txt', 'r', encoding='utf8') as f:
         keywords_list = f.readlines()
     for line_row in keywords_list:
         line_row = line_row.replace('\n','')
@@ -66,9 +66,12 @@ def class_1(sock5, port, keywords, time_sleep, year):
             "\t=..关键词", line, "爬完了..=\n"
         )
         # 清空断点文件
-        with open('app/断点.txt','r',encoding='utf8') as f:
-            f.seek(0)  # 将文件定位到文件首
-            f.truncate()  # 清空文件
+        try:
+            with open('app/断点.txt','w+',encoding='utf8') as f:
+                f.seek(0)  # 将文件定位到文件首
+                f.truncate()  # 清空文件
+        except:
+            pass
     print(
         "=所有的关键词都已经爬取到本地了 接下来是本地处理已经爬取好的文件=\n",
         "=这次使用的是一个py文件调用自编函数 打包以后还是必须要py源文件存在 无法对我的源码进行加密处理=\n",
@@ -103,7 +106,7 @@ def contral():
     except:
         print("\t=目录已经创建==")
     # 获取关键词list
-    with open('app/关键词_11-6.txt', 'r', encoding='utf8') as f:
+    with open('app/关键词.txt', 'r', encoding='utf8') as f:
         keywords = f.readlines()
     path_frist = os.getcwd()  # 获取当前目录 组合成新的目录 按照关键词进行建目录
     path = path_frist + '/' + year
@@ -137,7 +140,7 @@ def duandian(year):
 
     with open('app/断点.txt','r+',encoding='utf8') as f:
         data_duandian = f.read()
-        data_duandian = str(data_duandian)
+        data_duandian = str(data_duandian).replace('\n','')
         f.seek(0)
         f.truncate()
 

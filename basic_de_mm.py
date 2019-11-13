@@ -6,18 +6,7 @@ import os
 import csv
 import shutil
 import sys
-
-
-def flie_cleaner(keyword,year):
-    for row in keyword:
-        list_flie_name = []
-        path = year+'/'+row+'/'
-        flies_cea = os.listdir(path)
-        for line in flies_cea:
-            line = line.replace('.txt','')
-            list_flie_name.append(line)
-        
-        
+   
 def re_seach(bat, flags):
     """
     默认判定不区分大小写\n
@@ -29,7 +18,7 @@ def re_seach(bat, flags):
     return bool(result)
 
 def re_findALL(bat,flags):
-    result = re.compile(bat).findall(flags)
+    result = re.compile(bat,re.IGNORECASE).findall(flags)
     if len(result)>=2:
         return True
     else:
@@ -116,16 +105,28 @@ class tran():
                 line = self.Assignment[tt]
             except:
                 break
+
+            if re_findALL(keyword_one,str(data)):
+                self.date = data[1]
+                self.title = data[0]
+                self.data = data[2:]
+                self.csv_write(line, keyword_one, data)
+                conc = False
+                break
+
+
+            """
             for row in self.Assignment_character:
                 # re_seach(keyword_one,str(data)):
                 if re_seach(line, str(data)) and re_seach(row, str(data)):
-                    if re_findALL(keyword_one,str(data)):
-                        self.date = data[1]
-                        self.title = data[0]
-                        self.data = data[2:]
-                        self.csv_write(line, keyword_one, data)
-                        conc = False
-                        break
+
+                    self.date = data[1]
+                    self.title = data[0]
+                    self.data = data[2:]
+                    self.csv_write(line, keyword_one, data)
+                    conc = False
+                    break
+            """
             tt += 1
 
     def csv_write(self, Assignment, keyword_one, data):
@@ -142,7 +143,7 @@ class tran():
                                 '’', "'").replace('ö', 'o').replace(' – ', '-').replace('é', 'e').replace('é', 'e').replace(
                                 ' ´', "'").replace('--', '__')
             self.text+=line
-        global rows
+        
         num = csv_fuzhi(self.text,self.title,self.date,keyword_one)
         if 'Speech' in self.date:
             assignment = 'Speech'
@@ -158,8 +159,6 @@ class tran():
                 pass
             else:
                 rows = []
-        # elif year not in date or str(int(year)+1) not in date:
-        #     row = []
         elif re_seach(self.year,self.date)  or re_seach(str(int(self.year)+1),self.date):
             rows = [keyword_one, self.date, self.title, assignment, self.text, num]
         else:
