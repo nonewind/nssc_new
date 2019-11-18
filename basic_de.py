@@ -52,13 +52,23 @@ def req_url_text_handle(data_url, keywords, year, xx, url):
             f.write(data_bs)
             f.write('\n')
             for line in text_bs:
-                line = str(line).replace('<span lang="en">', '').replace(
-                    '<p class="Programm-Titelblatt rte__paragraph">', '').replace(
-                    '</span>', '').replace('<span lang="EN-GB">', '').replace(
-                    '<p class="rte__paragraph">', '').replace('</p>', '').replace(
-                    '<br/>', '\n').replace('</em>', '').replace('<em class="rte__emphasis">', '').replace(
-                    '<p class="MsoNormal rte__paragraph">', '').replace('<abbr class="rte__abbreviation" title="European Union">', '').replace(
-                    '</abbr>', '')
+                line = str(line)
+                if '<' in line or '>' in line:
+                    con = True
+                    while con:
+                        line_list = list(line)
+                        try:
+                            tag_l = line_list.index('<')
+                            tag_r = line_list.index('>')
+                        except:
+                            break
+                        del line_list[tag_l:tag_r+1]
+                        
+                        line = "".join(line_list)
+                        if '<' in line or '>' in line:
+                            con = True
+                        else:
+                            con = False
                 f.write(line)
                 f.write('\n')
     else:

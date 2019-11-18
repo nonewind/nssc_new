@@ -20,6 +20,7 @@ def re_seach(bat, flags):
 def re_findALL(bat,flags):
     result = re.compile(bat,re.IGNORECASE).findall(flags)
     if len(result)>=2:
+        print(len(result))
         return True
     else:
         return False
@@ -35,24 +36,24 @@ def csv_fuzhi(text,title,date,keyword_one):
                 return '0.1'
             else:
                 return False
-        elif re_seach('International Conference',text):
-            if re_seach('speech',date):
-                return '0.3'
-            elif re_seach('statement',text):
-                return '0.2'
-            else:
-                return False
-        elif re_seach('speech',date):
-            if re_seach('speech',text):
-                return '0.2'
-            else:
-                return False
-        elif re_seach('statement',text):
-            return '0.1'
         else:
             return False
+    elif re_seach('International Conference',text):
+        if re_seach('speech',date):
+            return '0.3'
+        elif re_seach('statement',text):
+            return '0.2'
+        else:
+            return False
+    elif re_seach('speech',date):
+        if re_seach('speech',text):
+            return '0.2'
+        else:
+            return False
+    elif re_seach('statement',text):
+        return '0.1'
     else:
-        return False 
+        return False
 
 
 class tran():
@@ -83,7 +84,7 @@ class tran():
 
 
         for lien in self.csv_row:
-            print('xxx')
+            print(lien)
             with open(self.year+'.csv', 'a+', encoding='utf-8', newline='') as csvflie:
                 w_csv_f = csv.writer(csvflie)
                 w_csv_f.writerow(lien)
@@ -105,16 +106,15 @@ class tran():
                 line = self.Assignment[tt]
             except:
                 break
-
-            if re_findALL(keyword_one,str(data)):
-                self.date = data[1]
-                self.title = data[0]
-                self.data = data[2:]
-                self.csv_write(line, keyword_one, data)
-                conc = False
-                break
-
-
+            for row in self.Assignment_character:
+                if re_seach(line,str(data)) and re_seach(row,str(data)):
+                #if re_findALL(keyword_one,str(data)):
+                    self.date = data[1]
+                    self.title = data[0]
+                    self.data = data[2:]
+                    self.csv_write(line, keyword_one, data)
+                    conc = False
+                    break
             """
             for row in self.Assignment_character:
                 # re_seach(keyword_one,str(data)):
@@ -142,6 +142,7 @@ class tran():
                             '<abbr class="rte__abbreviation" title="United Nations">', '').replace('“', '"').replace('”', '"').replace(
                                 '’', "'").replace('ö', 'o').replace(' – ', '-').replace('é', 'e').replace('é', 'e').replace(
                                 ' ´', "'").replace('--', '__')
+            
             self.text+=line
         
         num = csv_fuzhi(self.text,self.title,self.date,keyword_one)
@@ -150,7 +151,6 @@ class tran():
         else:
             assignment = Assignment
         if len(self.text)>=30000:
-            #text = text.replace(', ',',').replace(' ,',',')
             text_1 = self.text[:15000]
             text_2 = self.text[15000:]
             rows = [keyword_one, self.date, self.title, assignment, text_1,text_2, num]
@@ -168,7 +168,7 @@ class tran():
             pass
         else:
             rows = []
-        if bool(rows):
+        if rows:
             self.csv_row.append(rows)
         else:
             pass

@@ -9,6 +9,7 @@ import shutil
 import basic_de
 import basic_de_mm
 
+
 def flie_reader(year):
     Assignment = []
     Assignment_character = []
@@ -35,11 +36,11 @@ def flie_reader(year):
     for row in _Assignment_character:
         row = row.replace('\n','')
         Assignment_character.append(row)
-    #basic_de_mm.flie_cleaner(keyword,year)
+
     tyy = basic_de_mm.tran(keyword,year,Assignment,Assignment_character)
+    # 预计在这里加入一个nltk的关于赋值和主题的分拣器 替换原有的re赋值和分拣
     tyy.flie_read()
     
-    #basic_de.keyword_filter(keyword,year,Assignment,Assignment_character)
     #shutil.rmtree(year) #删除临时爬取的文件
     print(
         year,'搞定!'
