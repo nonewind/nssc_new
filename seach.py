@@ -7,49 +7,42 @@ import os
 import shutil
 
 import basic_de
-import basic_de_mm
+import ten_fen
 
 
 def flie_reader(year):
-    Assignment = []
-    Assignment_character = []
     keyword = []
     row = ['Keywords', 'Date', 'Article Title',
-           'Grounds', 'Original Text','Num']
+           'Grounds', 'Original Text', 'Num']
     with open(year+'.csv', 'a+', encoding='utf-8', newline='') as csvflie:
         w_csv_f = csv.writer(csvflie)
         w_csv_f.writerow(row)
     with open('app/关键词.txt', 'r', encoding='utf8') as f:
-        keywords_list = f.readlines()
-    for line_row in keywords_list:
-        line_row = line_row.replace('\n','')
-        keyword.append(line_row)
+        keywords_list = f.read()
+    keyword = keywords_list.split('\n')
 
-    with open('app/赋值关键词.txt','r',encoding='utf8') as f:
-        _Assignment_list = f.readlines()
-    for line in _Assignment_list:
-        line = line.replace('\n','')
-        Assignment.append(line)
+    with open('app/赋值关键词.txt', 'r', encoding='utf8') as f:
+        _Assignment_list = f.read()
+    Assignment = _Assignment_list.split('\n')
 
-    with open('app/赋值人物.txt','r',encoding='utf8') as f:
-        _Assignment_character = f.readlines()
-    for row in _Assignment_character:
-        row = row.replace('\n','')
-        Assignment_character.append(row)
+    with open('app/赋值人物.txt', 'r', encoding='utf8') as f:
+        _Assignment_character = f.read()
+    Assignment_character = _Assignment_character.split('\n')
 
-    tyy = basic_de_mm.tran(keyword,year,Assignment,Assignment_character)
-    # 预计在这里加入一个nltk的关于赋值和主题的分拣器 替换原有的re赋值和分拣
-    tyy.flie_read()
-    
-    #shutil.rmtree(year) #删除临时爬取的文件
+    rank_text_and_res = ten_fen.Fen(
+        keyword, year, Assignment, Assignment_character)
+    rank_text_and_res.text_read()
+
+    # shutil.rmtree(year) #删除临时爬取的文件
     print(
-        year,'搞定!'
+        year, '搞定!'
     )
+
 
 def class_1(sock5, port, keywords, time_sleep, year):
     for line in keywords:
-        try: # 写入断点文件 方便未来续断操作
-            with open('app/断点.txt','w',encoding='utf8') as f:
+        try:  # 写入断点文件 方便未来续断操作
+            with open('app/断点.txt', 'w', encoding='utf8') as f:
                 f.write(line)
         except:
             pass
@@ -68,7 +61,7 @@ def class_1(sock5, port, keywords, time_sleep, year):
         )
         # 清空断点文件
         try:
-            with open('app/断点.txt','w+',encoding='utf8') as f:
+            with open('app/断点.txt', 'w+', encoding='utf8') as f:
                 f.seek(0)  # 将文件定位到文件首
                 f.truncate()  # 清空文件
         except:
@@ -78,6 +71,7 @@ def class_1(sock5, port, keywords, time_sleep, year):
         "=这次使用的是一个py文件调用自编函数 打包以后还是必须要py源文件存在 无法对我的源码进行加密处理=\n",
         "=下一次考虑使用单个exe解决问题=\n"
     )
+
 
 def contral():
     """
@@ -89,8 +83,7 @@ def contral():
         "================================\n",
         '       @python 3.7.0 @ziheng_wind  \n',
         '================================\n\n\n\n\n',
-        '= 因为网站的未知性 在最后生成的文件中会有很小部分是html源码 = \n \t占比约在0.01%\n',
-        '= 默认第一步结束后开始第二布 =\n'
+        '= 默认第一步结束后开始第二步 =\n'
     )
     print(
         "\t=初始化部分=\n"
@@ -130,6 +123,7 @@ def contral():
     )
     return year
 
+
 def duandian(year):
     list_keyword = []
     config = configparser.ConfigParser()
@@ -139,22 +133,22 @@ def duandian(year):
     port = config['User']['sock5_prot']
     time_sleep = config['User']['time_sleep']
 
-    with open('app/断点.txt','r+',encoding='utf8') as f:
+    with open('app/断点.txt', 'r+', encoding='utf8') as f:
         data_duandian = f.read()
-        data_duandian = str(data_duandian).replace('\n','')
+        data_duandian = str(data_duandian).replace('\n', '')
         f.seek(0)
         f.truncate()
 
-    with open('app/关键词.txt','r',encoding='utf8') as f:
+    with open('app/关键词.txt', 'r', encoding='utf8') as f:
         data_keywords_list = f.readlines()
         for line in data_keywords_list:
-            line = line.replace('\n','')
+            line = line.replace('\n', '')
             list_keyword.append(line)
     index_seek = list_keyword.index(data_duandian)
     list_keyword_new = list_keyword[index_seek:]
-    # 调用本身的函数 
+    # 调用本身的函数
     print(
-        "断点续操的起始点为",data_duandian
+        "断点续操的起始点为", data_duandian
     )
     class_1(sock5, port, list_keyword_new, time_sleep, year)
 
