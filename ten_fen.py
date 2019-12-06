@@ -9,23 +9,6 @@ from rake_nltk import Rake
 
 
 
-def fuzhi(keyword):
-    if Assignment_row == 'humanitarian aid':
-        num = '0.4'
-    elif Assignment_row == 'International Conference':
-        if search_re('Press release',date):
-            num = '0.2'
-        elif search_re('Speech',date):
-            num = '0.3'
-        else:
-            num = '0.2'
-    elif Assignment_row == 'Speech':
-        num = '0.2'
-    else:
-        num = '0.1'
-    return num
-
-
 def search_re(bat, flat):
     result = re.search(bat, flat, re.IGNORECASE)
     if result:
@@ -94,7 +77,6 @@ class Fen():
 
     def csv_w(self, Assignment_row, key,text_rank_new):
         line_text = ''
-        num_text_title = 0
         for line in self.Assignment_character:
             if search_re(line, self.data_text):
                 with open(self.path, 'r', encoding='utf8') as f:
@@ -120,46 +102,49 @@ class Fen():
                     line_text += line
                 line_text = replace_str(line_text)
                 #如果标题中不出现关键词，赋值为0.1
-                if search_re(key,title):
-                    pass
-                else:
-                    num = '0.1'
+                if float(num)<0.4:
+                    if search_re(key,title):
+                        pass
+                    else:
+                        num = '0.1'
 
 
                 # 赋值重定义 基于之前的规则做补充
-                if search_re('summit',title) or search_re('summit',line_text):
+                if search_re('summit',title):
                     num = '0.3' 
                 # armed conflict这一条目增加UN mission,
                 if key == 'Armed conflicts':
-                    if search_re('UN mission',title) or search_re('UN mission',line_text):
+                    if search_re('UN mission',title) :
                         num = '0.2'
                 # Law of sea 需要完全匹配
                 if key == 'Law of sea':
-                    if search_re(key,title) or search_re(key,line_text):
+                    if search_re(key,title):
                         pass
                     else:
                         num = ''
                 
                 # trade 这条关键词增加commerce, industry
                 if key=='International trade and development':
-                    if search_re('commerce',title) or search_re('commerce',line_text):
+                    if search_re('commerce',title):
                         num = '0.2'
-                    elif search_re('industry',title) or search_re('industry',line_text):
+                    elif search_re('industry',title) :
                         num = '0.2'
                     else:
                         pass
                 
                 # Middle East增加关键词Lebanon,Kosovo，Yemen
                 if key == 'Middle East':
-                    if search_re('Lebanon',line_text) or search_re('Lebanon',title):
+                    if search_re('Lebanon',title):
                         num = '0.2'
-                    elif search_re('Kosovo',line_text) or search_re('Kosovo',title):
+                    elif search_re('Kosovo',title):
                         num = '0.2'
-                    elif search_re('Yemen',line_text) or search_re('Yemen',title):
+                    elif  search_re('Yemen',title):
                         num = '0.2'
                 if key == 'Human right':
-                    if search_re('religious freedom',line_text) or search_re('religious freedom',title):
+                    if search_re('religious freedom',title):
                         num = '0.2'
+
+                
                 
                 if num:
                     row = [key, date, title, Assignment_row, line_text, num]    
