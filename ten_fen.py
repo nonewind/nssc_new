@@ -8,13 +8,13 @@ import configparser
 from rake_nltk import Rake
 
 
-
 def search_re(bat, flat):
     result = re.search(bat, flat, flags=re.IGNORECASE)
     if result:
         return True
     else:
         return False
+
 
 def replace_str(string):
     return string.replace('“', '"').replace('”', '"').replace(
@@ -46,7 +46,7 @@ class Fen():
             list_key = list_key.split(', ')
             for line in list_key:
                 self.key_theme.append(line)
-            
+
             for i in range(0, 1000):
                 self.path = self.year+'/'+key+'/'+str(i)+'.txt'
                 try:
@@ -62,7 +62,8 @@ class Fen():
         r = Rake()
         r.extract_keywords_from_text(self.data_text)
         text_rank = r.get_ranked_phrases()
-        text_rank_new = text_rank[:int(len(text_rank)*float(self.Assignment_rate))]
+        text_rank_new = text_rank[:int(
+            len(text_rank)*float(self.Assignment_rate))]
         while con:
             try:
                 text_rank_new_line = text_rank_new[xx]
@@ -70,14 +71,14 @@ class Fen():
                 break
             for Assignment_row in self.Assignment:
                 if search_re(Assignment_row, text_rank_new_line):
-                    self.csv_w(Assignment_row, key,text_rank_new)
+                    self.csv_w(Assignment_row, key, text_rank_new)
                     con = False
                     break  # 这里只需要匹配一次
                 else:
                     pass
             xx += 1
 
-    def csv_w(self, Assignment_row, key,text_rank_new):
+    def csv_w(self, Assignment_row, key, text_rank_new):
         line_text = ''
         xy = 0
         for line in self.Assignment_character:
@@ -89,8 +90,8 @@ class Fen():
                 if Assignment_row == 'humanitarian aid':
                     num = '0.4'
                     xy = 1
-                elif Assignment_row == 'International Conference':
-                    if search_re('Speech',date):
+                elif Assignment_row == 'International Conference' or Assignment_row == 'summit' or Assignment_row == 'forum' or Assignment_row == 'dialogue':
+                    if search_re('summit',title) or search_re('forum',title) or search_re('dialogue',title):
                         num = '0.3'
                     else:
                         num = '0.2'
@@ -98,46 +99,40 @@ class Fen():
                     num = '0.2'
                 else:
                     num = '0.1'
-                
+
                 for line in text[2:]:
                     line = line.replace('\n', '/////')
                     line_text += line
                 line_text = replace_str(line_text)
 
-                #如果标题中不出现主题内含有关键词，赋值为0.1
-                if float(num)<0.4:
+                # 如果标题中不出现主题内含有关键词，赋值为0.1
+                if float(num) < 0.4:
                     for line in self.key_theme:
-                        print(num)
-                        if search_re(line,title):
+                        if search_re(line, title):
                             xy = 1
                             break
                 if xy == 0:
-                    num = '0.1'     
+                    num = '0.1'
+
                 # Law of sea 需要完全匹配
                 if key == 'Law of sea':
-                    if search_re(key,title):
+                    if search_re(key, title):
                         pass
                     else:
                         num = ''
-
-                # interview  
+                # interview
                 if num != '0.1':
                     if num == '0.4':
                         pass
                     else:
-                        if search_re('interview',title):
+                        if search_re('interview', title):
                             num = '0.1'
-                # 赋值重定义 基于之前的规则做补充
-                if Assignment_row == 'International Conference':
-                    if search_re('summit',title):
-                        num = '0.3' 
-               
-                if num:
-                    row = [key, date, title, Assignment_row, line_text, num]    
 
+                if num:
+                    row = [key, date, title, Assignment_row, line_text, num]
+                # 人权专员不配拥有姓名
                 if 'Human Rights Commissioner' in line_text or 'Human Rights Commissioner' in title:
-                    # 人权专员不配拥有姓名
-                        row = []
+                    row = []
                 if row:
                     with open(self.year+'.csv', 'a+', encoding='utf-8', newline='') as csvflie:
                         w_csv_f = csv.writer(csvflie)
@@ -145,6 +140,7 @@ class Fen():
                 break
             else:
                 pass
+
 
 if __name__ == "__main__":
     pass
