@@ -12,12 +12,9 @@ import ten_fen
 
 def flie_reader(year):
     keyword = []
-    config_theme = configparser.ConfigParser()
-    config_theme.read('app/theme.ini', encoding='utf8')
-    # 在这里改写后面的赋值 赋值改为：双包含 - 以主题为核心，关键词为辅助 赋予主题增加赋值准确率 
-    # 准备的文件 
     row = ['Keywords', 'Date', 'Article Title',
            'Grounds', 'Original Text', 'Num']
+    # 这里改写赋值 利用ini文件的特性 将每一个主题下的关键词存为一个list 方便读取 
     with open(year+'.csv', 'a+', encoding='utf-8', newline='') as csvflie:
         w_csv_f = csv.writer(csvflie)
         w_csv_f.writerow(row)

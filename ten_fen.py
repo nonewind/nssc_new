@@ -10,15 +10,8 @@ from rake_nltk import Rake
 
 
 def search_re(bat, flat):
-    result = re.search(bat, flat, re.IGNORECASE)
+    result = re.search(bat, flat, flags=re.IGNORECASE)
     if result:
-        return True
-    else:
-        return False
-
-def search_re_com(bat,flat):
-    result = re.compile(bat,re.IGNORECASE).findall(flat)
-    if len(result)>1:
         return True
     else:
         return False
@@ -39,12 +32,21 @@ class Fen():
         self.path = ''
         self.data_text = ''
         self.Assignment_rate = ''
+        self.key_theme = []
 
     def text_read(self):
         config = configparser.ConfigParser()
         config.read('app/爬虫设置.ini', encoding='utf8')
         self.Assignment_rate = config['User']['rate']
         for key in self.keyword:
+            theme_key = configparser.ConfigParser()
+            theme_key.read('app/theme.ini', encoding='utf8')
+            key_theme_keyword = '{}'.format(key)
+            list_key = theme_key['theme'][key_theme_keyword]
+            list_key = list_key.split(', ')
+            for line in list_key:
+                self.key_theme.append(line)
+            
             for i in range(0, 1000):
                 self.path = self.year+'/'+key+'/'+str(i)+'.txt'
                 try:
@@ -77,6 +79,7 @@ class Fen():
 
     def csv_w(self, Assignment_row, key,text_rank_new):
         line_text = ''
+        xy = 0
         for line in self.Assignment_character:
             if search_re(line, self.data_text):
                 with open(self.path, 'r', encoding='utf8') as f:
@@ -85,10 +88,9 @@ class Fen():
                 date = replace_str(text[1])
                 if Assignment_row == 'humanitarian aid':
                     num = '0.4'
+                    xy = 1
                 elif Assignment_row == 'International Conference':
-                    if search_re('Press release',date):
-                        num = '0.2'
-                    elif search_re('Speech',date):
+                    if search_re('Speech',date):
                         num = '0.3'
                     else:
                         num = '0.2'
@@ -101,71 +103,41 @@ class Fen():
                     line = line.replace('\n', '/////')
                     line_text += line
                 line_text = replace_str(line_text)
-                #如果标题中不出现关键词，赋值为0.1
+
+                #如果标题中不出现主题内含有关键词，赋值为0.1
                 if float(num)<0.4:
-                    if search_re(key,title):
-                        pass
-                    else:
-                        num = '0.1'
-
-
-                # 赋值重定义 基于之前的规则做补充
-                if search_re('summit',title):
-                    num = '0.3' 
-                # armed conflict这一条目增加UN mission,
-                if key == 'Armed conflicts':
-                    if search_re('UN mission',title) :
-                        num = '0.2'
+                    for line in self.key_theme:
+                        print(num)
+                        if search_re(line,title):
+                            xy = 1
+                            break
+                if xy == 0:
+                    num = '0.1'     
                 # Law of sea 需要完全匹配
                 if key == 'Law of sea':
                     if search_re(key,title):
                         pass
                     else:
                         num = ''
-                
-                # trade 这条关键词增加commerce, industry
-                if key=='International trade and development':
-                    if search_re('commerce',title):
-                        num = '0.2'
-                    elif search_re('industry',title) :
-                        num = '0.2'
-                    else:
-                        pass
-                
-                # Middle East增加关键词Lebanon,Kosovo，Yemen
-                if key == 'Middle East':
-                    if search_re('Lebanon',title):
-                        num = '0.2'
-                    elif search_re('Kosovo',title):
-                        num = '0.2'
-                    elif  search_re('Yemen',title):
-                        num = '0.2'
-                if key == 'Human right':
-                    if search_re('religious freedom',title):
-                        num = '0.2'
 
-                
-                
+                # interview  
+                if num != '0.1':
+                    if num == '0.4':
+                        pass
+                    else:
+                        if search_re('interview',title):
+                            num = '0.1'
+                # 赋值重定义 基于之前的规则做补充
+                if Assignment_row == 'International Conference':
+                    if search_re('summit',title):
+                        num = '0.3' 
+               
                 if num:
                     row = [key, date, title, Assignment_row, line_text, num]    
 
                 if 'Human Rights Commissioner' in line_text or 'Human Rights Commissioner' in title:
                     # 人权专员不配拥有姓名
                         row = []
-                
-                """
-                if search_re(key,title):
-                    #正文和标题，整篇里面，关键词出现一个且只有一次的，就舍去。
-                    num_text_title+=1
-                if search_re(key,line_text):
-                    num_text_title+=1
-                if search_re_com(key,line_text):
-                    num_text_title+=2
-                if num_text_title >=2 :
-                    row = [key, date, title, Assignment_row, line_text, num]
-                else:
-                    row = []
-                """
                 if row:
                     with open(self.year+'.csv', 'a+', encoding='utf-8', newline='') as csvflie:
                         w_csv_f = csv.writer(csvflie)
@@ -173,7 +145,6 @@ class Fen():
                 break
             else:
                 pass
-
 
 if __name__ == "__main__":
     pass
